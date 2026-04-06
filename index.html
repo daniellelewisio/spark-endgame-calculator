@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -308,6 +309,7 @@
     line-height: 1.5;
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 <div class="calculator">
@@ -552,6 +554,7 @@
 
     <div class="nav-row space">
       <button class="btn" onclick="goTo(1)">← Back</button>
+      <button class="btn primary" onclick="downloadCSV()">↓ Download as Excel</button>
     </div>
     <p class="disclaimer">Simple planning tool only — not financial, tax, or investment advice.</p>
   </div>
@@ -640,6 +643,120 @@
   }
 
   calc();
+
+  function downloadCSV() {
+    if (typeof XLSX === 'undefined') {
+      alert('Export is loading, please try again in a moment.');
+      return;
+    }
+
+    var income   = parseFloat(document.getElementById('s1_income').value)   || 0;
+    var expenses = parseFloat(document.getElementById('s1_expenses').value) || 0;
+    var buffer   = parseFloat(document.getElementById('s1_buffer').value)   || 0;
+    var weeksoff = parseFloat(document.getElementById('s1_weeksoff').value) || 0;
+    var hours    = parseFloat(document.getElementById('s1_hours').value)    || 0;
+    var offer    = parseFloat(document.getElementById('s1_offer').value)    || 0;
+    var swr      = parseFloat(document.getElementById('s2_swr').value)      || 0;
+    var current  = parseFloat(document.getElementById('s3_current').value)  || 0;
+    var annual   = parseFloat(document.getElementById('s3_annual').value)   || 0;
+    var rate     = parseFloat(document.getElementById('s3_rate').value)     || 0;
+    var years    = parseFloat(document.getElementById('s3_years').value)    || 0;
+
+    var FMT_DOLLAR  = '"$"#,##0';
+    var FMT_DOLLAR2 = '"$"#,##0.00';
+    var FMT_PCT     = '0.0%';
+    var FMT_NUM     = '#,##0';
+
+    var HEADING  = { font: { bold: true, sz: 13, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '333031' } }, alignment: { horizontal: 'left' } };
+    var SUBHEAD  = { font: { bold: true, sz: 11, color: { rgb: '8B3E3E' } } };
+    var LABEL    = { font: { sz: 11, color: { rgb: '4a4648' } } };
+    var INPUT    = { font: { sz: 11, color: { rgb: '0000CC' } }, fill: { fgColor: { rgb: 'FFF5F5' } } };
+    var RESULT   = { font: { sz: 11, bold: true, color: { rgb: '333031' } }, fill: { fgColor: { rgb: 'F4F2F0' } } };
+    var DISC     = { font: { sz: 9, italic: true, color: { rgb: '999999' } } };
+
+    function cell(v, t, fmt, style) {
+      var c = t === 'f' ? { t: 'n', f: v } : { t: t || 's', v: v };
+      if (fmt) c.z = fmt;
+      if (style) c.s = style;
+      return c;
+    }
+
+    function applyToSheet(ws, cellMap) {
+      Object.keys(cellMap).forEach(function(addr) { ws[addr] = cellMap[addr]; });
+    }
+
+    var wb = XLSX.utils.book_new();
+
+    // ── SHEET 1: CEO NUMBERS ──────────────────────────────────────
+    var ws1 = {};
+    applyToSheet(ws1, {
+      'A1': cell('SPARK Business — Endgame Calculator', 's', null, HEADING),
+      'A2': cell('Generated: ' + new Date().toLocaleDateString('en-AU', {day:'numeric',month:'long',year:'numeric'}), 's', null, LABEL),
+      'A4': cell('STEP 1: YOUR CEO NUMBERS', 's', null, HEADING),
+      'A5': cell('YOUR INPUTS', 's', null, SUBHEAD),
+      'A6': cell('Annual Income Goal', 's', null, LABEL),          'B6': cell(income,      'n', FMT_DOLLAR, INPUT),
+      'A7': cell('Annual Business Expenses', 's', null, LABEL),    'B7': cell(expenses,    'n', FMT_DOLLAR, INPUT),
+      'A8': cell('Profit Buffer', 's', null, LABEL),               'B8': cell(buffer/100,  'n', FMT_PCT,    INPUT),
+      'A9': cell('Weeks Off Per Year', 's', null, LABEL),          'B9': cell(weeksoff,    'n', FMT_NUM,    INPUT),
+      'A10': cell('Hours Per Week', 's', null, LABEL),             'B10': cell(hours,      'n', FMT_NUM,    INPUT),
+      'A11': cell('Offer Price', 's', null, LABEL),                'B11': cell(offer,      'n', FMT_DOLLAR, INPUT),
+      'A13': cell('CALCULATED TARGETS', 's', null, SUBHEAD),
+      'A14': cell('Required Revenue (Annual)', 's', null, LABEL),  'B14': cell('IFERROR((B6+B7)/(1-B8),0)', 'f', FMT_DOLLAR, RESULT),
+      'A15': cell('Monthly Revenue Target', 's', null, LABEL),     'B15': cell('B14/12', 'f', FMT_DOLLAR, RESULT),
+      'A16': cell('Working Weeks Per Year', 's', null, LABEL),     'B16': cell('52-B9', 'f', FMT_NUM, RESULT),
+      'A17': cell('Weekly Revenue Target', 's', null, LABEL),      'B17': cell('IFERROR(B14/B16,0)', 'f', FMT_DOLLAR, RESULT),
+      'A18': cell('Hourly Revenue Target', 's', null, LABEL),      'B18': cell('IFERROR(B17/B10,0)', 'f', FMT_DOLLAR2, RESULT),
+      'A20': cell('OFFER TRANSLATION', 's', null, SUBHEAD),
+      'A21': cell('Sales Per Year', 's', null, LABEL),             'B21': cell('IFERROR(B14/B11,0)', 'f', FMT_NUM, RESULT),
+      'A22': cell('Sales Per Month', 's', null, LABEL),            'B22': cell('IFERROR(B21/12,0)', 'f', FMT_NUM, RESULT),
+      'A23': cell('Sales Per Week', 's', null, LABEL),             'B23': cell('IFERROR(B21/B16,0)', 'f', FMT_NUM, RESULT),
+      'A25': cell('Simple planning tool only — not financial, tax, or investment advice.', 's', null, DISC)
+    });
+    ws1['!ref'] = 'A1:B25';
+    ws1['!cols'] = [{ wch: 34 }, { wch: 22 }];
+    ws1['!rows'] = [{ hpt: 22 }, {}, {}, {}, { hpt: 18 }];
+
+    // ── SHEET 2: FREEDOM NUMBER ───────────────────────────────────
+    var ws2 = {};
+    applyToSheet(ws2, {
+      'A1': cell('STEP 2: YOUR FREEDOM NUMBER', 's', null, HEADING),
+      'A3': cell('YOUR INPUTS', 's', null, SUBHEAD),
+      'A4': cell('Annual Lifestyle Income', 's', null, LABEL),   'B4': cell(income,    'n', FMT_DOLLAR, INPUT),
+      'A5': cell('Safe Withdrawal Rate', 's', null, LABEL),      'B5': cell(swr/100,   'n', FMT_PCT,    INPUT),
+      'A7': cell('YOUR FREEDOM NUMBER', 's', null, SUBHEAD),
+      'A8': cell('Total Investments Required', 's', null, LABEL),'B8': cell('IFERROR(B4/B5,0)', 'f', FMT_DOLLAR, RESULT),
+      'A10': cell('Simple planning tool only — not financial, tax, or investment advice.', 's', null, DISC)
+    });
+    ws2['!ref'] = 'A1:B10';
+    ws2['!cols'] = [{ wch: 34 }, { wch: 22 }];
+
+    // ── SHEET 3: PATH TO FREEDOM ──────────────────────────────────
+    var ws3 = {};
+    applyToSheet(ws3, {
+      'A1': cell('STEP 3: YOUR PATH TO FREEDOM', 's', null, HEADING),
+      'A3': cell('YOUR INPUTS', 's', null, SUBHEAD),
+      'A4': cell('Freedom Number (from Step 2)', 's', null, LABEL), 'B4': cell((swr > 0 ? income/(swr/100) : 0), 'n', FMT_DOLLAR, INPUT),
+      'A5': cell('Current Investments', 's', null, LABEL),           'B5': cell(current,   'n', FMT_DOLLAR, INPUT),
+      'A6': cell('Annual Investment', 's', null, LABEL),             'B6': cell(annual,    'n', FMT_DOLLAR, INPUT),
+      'A7': cell('Expected Growth Rate', 's', null, LABEL),          'B7': cell(rate/100,  'n', FMT_PCT,    INPUT),
+      'A8': cell('Years to Project', 's', null, LABEL),              'B8': cell(years,     'n', FMT_NUM,    INPUT),
+      'A10': cell('PROJECTED GROWTH', 's', null, SUBHEAD),
+      'A11': cell('Future Value of Current Investments', 's', null, LABEL),  'B11': cell('B5*(1+B7)^B8', 'f', FMT_DOLLAR, RESULT),
+      'A12': cell('Future Value of Annual Contributions', 's', null, LABEL), 'B12': cell('IFERROR(B6*(((1+B7)^B8-1)/B7),B6*B8)', 'f', FMT_DOLLAR, RESULT),
+      'A13': cell('Projected Total Investments', 's', null, LABEL),          'B13': cell('B11+B12', 'f', FMT_DOLLAR, RESULT),
+      'A14': cell('% of Freedom Number Achieved', 's', null, LABEL),         'B14': cell('IFERROR(B13/B4,0)', 'f', FMT_PCT, RESULT),
+      'A16': cell('Simple planning tool only — not financial, tax, or investment advice.', 's', null, DISC)
+    });
+    ws3['!ref'] = 'A1:B16';
+    ws3['!cols'] = [{ wch: 38 }, { wch: 22 }];
+
+    XLSX.utils.book_append_sheet(wb, ws1, 'Step 1 - CEO Numbers');
+    XLSX.utils.book_append_sheet(wb, ws2, 'Step 2 - Freedom Number');
+    XLSX.utils.book_append_sheet(wb, ws3, 'Step 3 - Path to Freedom');
+
+    XLSX.writeFile(wb, 'SPARK-Endgame-Calculator.xlsx');
+  }
+
 </script>
 </body>
 </html>
