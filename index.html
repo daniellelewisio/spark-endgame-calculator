@@ -1,313 +1,151 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-AU">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SPARK Endgame Calculator</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --gold: #c36e6e;
-    --gold-light: #e2b5b0;
-    --gold-dark: #8B3E3E;
+    --rose: #c36e6e;
+    --rose-text: #9a4f4f;
+    --blush: #e2b5b0;
     --ink: #333031;
     --ink-mid: #4a4648;
-    --ink-light: #7a7375;
-    --ink-faint: #c5bebe;
-    --surface: #f4f2f0;
-    --surface-2: #ede9e7;
-    --surface-3: #ddd8d6;
-    --white: #FFFFFF;
-    --success: #3A7D44;
-    --success-bg: #EAF3EC;
-    --radius: 12px;
-    --radius-sm: 8px;
+    --muted: #6b5e5e;
+    --line: #ddd8d6;
+    --paper: #f4f2f0;
+    --paper-2: #ede9e7;
+    --card: #fbfaf8;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --serif: 'Playfair Display', Georgia, serif;
+    --sans: 'Poppins', Arial, sans-serif;
   }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--surface);
-    color: var(--ink);
-    min-height: 100vh;
-    padding: 0;
-  }
-
-  .calculator {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem 3rem;
-  }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  .calculator { max-width: 700px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
 
   /* Header */
-  .calc-header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-  }
+  .calc-header { text-align: center; margin-bottom: 2.25rem; }
   .calc-header .eyebrow {
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--gold);
-    font-weight: 500;
-    margin-bottom: 10px;
+    display: inline-block; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--rose-text); font-weight: 500; border: 1px solid var(--rose); border-radius: 999px;
+    padding: 6px 14px; margin-bottom: 16px;
   }
-  .calc-header h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 32px;
-    font-weight: 400;
-    color: var(--ink);
-    line-height: 1.2;
-    margin-bottom: 10px;
-  }
-  .calc-header p {
-    font-size: 15px;
-    color: var(--ink-light);
-    line-height: 1.6;
-  }
+  .calc-header h1 { font-size: 30px; font-weight: 300; line-height: 1.2; }
+  .calc-header h1 em { display: block; font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--rose-text); }
 
   /* Step nav */
-  .steps-nav {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 2rem;
-  }
+  .steps-nav { display: flex; gap: 8px; margin-bottom: 2rem; }
   .step-pill {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 14px;
-    border-radius: var(--radius);
-    border: 1.5px solid var(--surface-3);
-    background: var(--white);
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    color: var(--ink-light);
+    flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+    border-radius: 999px; border: 1.5px solid var(--line); background: var(--card);
+    cursor: pointer; transition: border-color 0.2s, background 0.2s, color 0.2s;
+    font-family: var(--sans); font-size: 13px; color: var(--muted); min-height: 44px;
   }
-  .step-pill:hover { border-color: var(--gold); color: var(--ink-mid); }
-  .step-pill.active {
-    border-color: var(--gold);
-    background: var(--ink);
-    color: var(--white);
-  }
-  .step-pill.done { border-color: var(--gold-light); color: var(--gold-dark); }
+  .step-pill:hover { border-color: var(--rose); color: var(--ink); }
+  .step-pill:focus-visible, .btn:focus-visible, input:focus-visible { outline: 3px solid var(--blush); outline-offset: 2px; }
+  .step-pill.active { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+  .step-pill.done { border-color: var(--blush); color: var(--rose-text); }
   .step-num {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: var(--surface-2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 500;
-    flex-shrink: 0;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--paper-2);
+    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0;
   }
-  .step-pill.active .step-num { background: var(--gold); color: var(--ink); }
-  .step-pill.done .step-num { background: var(--gold-light); color: var(--gold-dark); }
+  .step-pill.active .step-num { background: var(--blush); color: var(--ink); }
+  .step-pill.done .step-num { background: var(--blush); color: var(--ink); }
   .step-label { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  /* Panel */
+  /* Panels */
   .panel { display: none; }
-  .panel.active { display: block; animation: fadeIn 0.2s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
+  .panel.active { display: block; }
   .panel-header { margin-bottom: 1.5rem; }
-  .panel-header h2 { font-family: 'DM Serif Display', serif; font-size: 24px; font-weight: 400; margin-bottom: 4px; }
-  .panel-header p { font-size: 14px; color: var(--ink-light); line-height: 1.5; }
+  .panel-kicker { font-size: 12px; font-weight: 500; color: var(--rose-text); margin-bottom: 6px; }
+  .panel-header h2 { font-size: 26px; font-weight: 300; margin-bottom: 6px; }
+  .panel-header p { font-size: 14px; color: var(--muted); line-height: 1.6; }
 
   /* Inputs */
-  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 1.5rem; }
-  @media (max-width: 480px) { .input-grid { grid-template-columns: 1fr; } }
-
-  .field label {
-    display: block;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--ink-mid);
-    margin-bottom: 5px;
-    letter-spacing: 0.02em;
-  }
-  .field .hint {
-    font-size: 11px;
-    color: var(--ink-faint);
-    margin-top: 4px;
-    line-height: 1.4;
-  }
-  .input-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-  .input-prefix {
-    position: absolute;
-    left: 12px;
-    font-size: 14px;
-    color: var(--ink-light);
-    pointer-events: none;
-    font-weight: 400;
-  }
-  .input-suffix {
-    position: absolute;
-    right: 12px;
-    font-size: 13px;
-    color: var(--ink-light);
-    pointer-events: none;
-  }
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: var(--ink-mid); margin-bottom: 6px; }
+  .field .hint { font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.45; }
+  .input-wrap { position: relative; display: flex; align-items: center; }
+  .input-prefix, .input-suffix { position: absolute; font-size: 14px; color: var(--muted); pointer-events: none; }
+  .input-prefix { left: 13px; }
+  .input-suffix { right: 13px; }
   input[type="number"] {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1.5px solid var(--surface-3);
-    border-radius: var(--radius-sm);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    color: var(--ink);
-    background: var(--white);
-    outline: none;
-    transition: border-color 0.15s;
-    -moz-appearance: textfield;
+    width: 100%; padding: 11px 13px; border: 1.5px solid var(--line); border-radius: var(--radius-sm);
+    font-family: var(--sans); font-size: 15px; color: var(--ink); background: #fff;
+    transition: border-color 0.15s; -moz-appearance: textfield;
   }
-  input[type="number"]::-webkit-outer-spin-button,
-  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
-  input[type="number"]:focus { border-color: var(--gold); }
-  .has-prefix input { padding-left: 26px; }
-  .has-suffix input { padding-right: 36px; }
+  input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  input[type="number"]:focus { border-color: var(--rose); outline: none; }
+  .has-prefix input { padding-left: 27px; }
+  .has-suffix input { padding-right: 60px; }
 
   /* Results */
-  .results-section {
-    background: var(--ink);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    position: relative;
-    overflow: hidden;
-  }
-  .results-section::before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle at top right, rgba(201,168,76,0.15), transparent 70%);
-    pointer-events: none;
-  }
-  .results-label {
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--gold);
-    font-weight: 500;
-    margin-bottom: 1rem;
-  }
+  .results-section { background: var(--ink); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; }
+  .results-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--blush); font-weight: 500; margin-bottom: 1rem; }
   .metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .metric-card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: var(--radius-sm);
-    padding: 12px 14px;
-  }
+  .metric-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: var(--radius-sm); padding: 13px 15px; }
   .metric-card.span2 { grid-column: span 2; }
-  .metric-card .m-label { font-size: 11px; color: rgba(255,255,255,0.45); margin-bottom: 4px; }
-  .metric-card .m-value { font-size: 22px; font-weight: 300; color: var(--white); letter-spacing: -0.02em; }
-  .metric-card .m-value .unit { font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 400; }
-  .metric-card.gold .m-value { color: var(--gold-light); }
+  .metric-card .m-label { font-size: 12px; color: #b3a9a3; margin-bottom: 4px; }
+  .metric-card .m-value { font-size: 23px; font-weight: 300; color: var(--paper); font-variant-numeric: tabular-nums; }
+  .metric-card .m-value .unit { font-size: 13px; color: #b3a9a3; font-weight: 400; }
+  .metric-card.hl { background: rgba(226,181,176,0.12); border-color: rgba(226,181,176,0.35); }
+  .metric-card.hl .m-value { color: var(--blush); font-size: 30px; }
+  .metric-note { font-size: 12px; color: #b3a9a3; margin-top: 6px; line-height: 1.45; }
+  .offer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .offer-divider { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0 12px; }
+  .offer-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #b3a9a3; margin-bottom: 8px; }
 
-  .offer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-  .offer-divider {
-    border: none;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    margin: 14px 0 10px;
-  }
-  .offer-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 8px; }
-
-  /* Freedom number */
-  .freedom-hero {
-    text-align: center;
-    background: var(--ink);
-    border-radius: var(--radius);
-    padding: 2.5rem 1.5rem;
-    margin-bottom: 1.5rem;
-    position: relative;
-    overflow: hidden;
-  }
-  .freedom-hero::before {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(201,168,76,0.12), transparent 65%);
-    pointer-events: none;
-  }
-  .freedom-hero .fh-label { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
-  .freedom-hero .fh-amount { font-family: 'DM Serif Display', serif; font-size: 52px; color: var(--white); letter-spacing: -0.02em; line-height: 1; margin-bottom: 12px; }
-  .freedom-hero .fh-sub { font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.5; max-width: 320px; margin: 0 auto; }
+  /* Endgame number hero */
+  .number-hero { text-align: center; background: var(--ink); border-radius: var(--radius); padding: 2.5rem 1.5rem; margin-bottom: 1.5rem; }
+  .number-hero .nh-label { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--blush); margin-bottom: 14px; }
+  .number-hero .nh-amount { font-size: 54px; font-weight: 300; color: var(--paper); line-height: 1; margin-bottom: 14px; font-variant-numeric: tabular-nums; }
+  .number-hero .nh-sum { font-size: 14px; color: #b3a9a3; margin-bottom: 6px; }
+  .number-hero .nh-sub { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--blush); line-height: 1.5; max-width: 380px; margin: 0 auto; }
 
   /* Reflection */
-  .reflection {
-    border: 1.5px solid var(--gold-light);
-    border-radius: var(--radius);
-    padding: 1.25rem 1.5rem;
-    background: #fdf6f5;
-    margin-bottom: 1.5rem;
-  }
-  .reflection .r-title { font-size: 12px; font-weight: 500; color: var(--gold-dark); letter-spacing: 0.05em; margin-bottom: 10px; text-transform: uppercase; }
-  .reflection .r-q { font-size: 14px; color: var(--ink-mid); padding: 5px 0; border-bottom: 1px solid var(--gold-light); line-height: 1.5; }
+  .reflection { border: 1.5px solid var(--blush); border-radius: var(--radius); padding: 1.25rem 1.5rem; background: #fdf6f5; margin-bottom: 1.5rem; }
+  .reflection .r-title { font-size: 13px; font-weight: 500; color: var(--rose-text); margin-bottom: 8px; }
+  .reflection .r-q { font-size: 14px; color: var(--ink-mid); padding: 7px 0; border-bottom: 1px solid var(--blush); line-height: 1.5; }
   .reflection .r-q:last-child { border-bottom: none; }
 
   /* Progress */
   .progress-section { margin-top: 14px; }
-  .progress-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-  .progress-header span { font-size: 12px; color: rgba(255,255,255,0.4); }
-  .progress-header strong { font-size: 14px; color: var(--gold-light); font-weight: 500; }
-  .progress-track { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
-  .progress-fill { height: 100%; background: var(--gold-light); border-radius: 3px; transition: width 0.4s ease; }
-  .progress-fill.achieved { background: var(--gold); }
+  .progress-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; gap: 12px; }
+  .progress-header span { font-size: 12px; color: #b3a9a3; }
+  .progress-header strong { font-size: 14px; color: var(--blush); font-weight: 500; }
+  .progress-track { height: 6px; background: rgba(255,255,255,0.12); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--blush); border-radius: 3px; transition: width 0.4s ease; }
 
-  /* Tagline */
-  .tagline {
-    text-align: center;
-    font-family: 'DM Serif Display', serif;
-    font-size: 15px;
-    color: var(--ink-light);
-    font-style: italic;
-    margin: 1rem 0 1.5rem;
-  }
+  .tagline { text-align: center; font-family: var(--serif); font-style: italic; font-size: 18px; color: var(--rose-text); margin: 1.25rem 0 1.5rem; line-height: 1.4; }
 
   /* Buttons */
-  .nav-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem; }
+  .nav-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
   .nav-row.space { justify-content: space-between; }
-
   .btn {
-    padding: 11px 24px;
-    border-radius: var(--radius-sm);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-    border: 1.5px solid var(--surface-3);
-    background: var(--white);
-    color: var(--ink-mid);
+    padding: 12px 24px; border-radius: 999px; font-family: var(--sans); font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;
+    border: 1.5px solid var(--ink); background: transparent; color: var(--ink); min-height: 44px;
   }
-  .btn:hover { border-color: var(--ink-faint); color: var(--ink); }
-  .btn.primary {
-    background: var(--ink);
-    color: var(--white);
-    border-color: var(--ink);
-  }
-  .btn.primary:hover { background: var(--ink-mid); }
+  .btn:hover { background: var(--ink); color: var(--paper); }
+  .btn.primary { background: var(--ink); color: var(--paper); }
+  .btn.primary:hover { background: var(--rose); border-color: var(--rose); }
 
-  /* Disclaimer */
-  .disclaimer {
-    font-size: 11px;
-    color: var(--ink-faint);
-    text-align: center;
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--surface-3);
-    line-height: 1.5;
+  .disclaimer { font-size: 12px; color: var(--muted); text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line); line-height: 1.55; }
+
+  @media (max-width: 520px) {
+    .input-grid { grid-template-columns: 1fr; }
+    .step-pill { padding: 10px; font-size: 12px; }
+    .number-hero .nh-amount { font-size: 42px; }
+    .offer-grid { grid-template-columns: 1fr 1fr 1fr; }
+    .metric-card .m-value { font-size: 20px; }
   }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
@@ -315,448 +153,406 @@
 <div class="calculator">
 
   <div class="calc-header">
-    <div class="eyebrow">SPARK Business</div>
-    <h1>Your Endgame Calculator</h1>
-    <p>Three steps from where you are to where you want to be.</p>
+    <div class="eyebrow">SPARK · Endgame Calculator</div>
+    <h1>Start with the life. <em>Then engineer the business.</em></h1>
   </div>
 
-  <div class="steps-nav">
-    <button class="step-pill active" onclick="goTo(0)" id="nav0">
-      <span class="step-num">1</span>
-      <span class="step-label">CEO Numbers</span>
+  <nav class="steps-nav" aria-label="Calculator steps">
+    <button type="button" class="step-pill active" onclick="goTo(0)" id="nav0" aria-current="step">
+      <span class="step-num">1</span><span class="step-label">Your number</span>
     </button>
-    <button class="step-pill" onclick="goTo(1)" id="nav1">
-      <span class="step-num">2</span>
-      <span class="step-label">Freedom Number</span>
+    <button type="button" class="step-pill" onclick="goTo(1)" id="nav1">
+      <span class="step-num">2</span><span class="step-label">Your path</span>
     </button>
-    <button class="step-pill" onclick="goTo(2)" id="nav2">
-      <span class="step-num">3</span>
-      <span class="step-label">Path to Freedom</span>
+    <button type="button" class="step-pill" onclick="goTo(2)" id="nav2">
+      <span class="step-num">3</span><span class="step-label">Your business</span>
     </button>
-  </div>
+  </nav>
 
-  <!-- STEP 1 -->
-  <div class="panel active" id="panel0">
+  <!-- STEP 1: RUN YOUR NUMBER -->
+  <section class="panel active" id="panel0">
     <div class="panel-header">
-      <h2>Your CEO Numbers</h2>
-      <p>What your business needs to deliver to support your life now.</p>
+      <p class="panel-kicker">Step 1 · Run your number</p>
+      <h2>Your Endgame Number</h2>
+      <p>The invested wealth, outside your business, that makes working optional. Start with what the life you want would cost each year.</p>
     </div>
 
     <div class="input-grid">
       <div class="field">
-        <label>Annual income goal</label>
+        <label for="s1_life">What your life costs a year</label>
         <div class="input-wrap has-prefix">
           <span class="input-prefix">$</span>
-          <input type="number" id="s1_income" value="1000000" oninput="calc()">
+          <input type="number" inputmode="decimal" id="s1_life" value="150000" min="0" oninput="calc()">
         </div>
-        <div class="hint">How much do you want to pay yourself per year?</div>
+        <div class="hint">The total from your Dream Life P&amp;L. Rough is fine.</div>
       </div>
       <div class="field">
-        <label>Annual business expenses</label>
-        <div class="input-wrap has-prefix">
-          <span class="input-prefix">$</span>
-          <input type="number" id="s1_expenses" value="200000" oninput="calc()">
-        </div>
-        <div class="hint">What does it cost to run your business?</div>
-      </div>
-      <div class="field">
-        <label>Profit buffer</label>
+        <label for="s1_swr">Withdrawal rate</label>
         <div class="input-wrap has-suffix">
-          <input type="number" id="s1_buffer" value="20" min="0" max="99" oninput="calc()">
+          <input type="number" inputmode="decimal" id="s1_swr" value="4" min="0.1" step="0.1" oninput="calc()">
           <span class="input-suffix">%</span>
         </div>
-        <div class="hint">Extra room for reinvestment, tax or safety.</div>
-      </div>
-      <div class="field">
-        <label>Weeks off per year</label>
-        <div class="input-wrap">
-          <input type="number" id="s1_weeksoff" value="8" min="0" max="51" oninput="calc()">
-        </div>
-        <div class="hint">How many weeks do you want off?</div>
-      </div>
-      <div class="field">
-        <label>Hours per week</label>
-        <div class="input-wrap">
-          <input type="number" id="s1_hours" value="25" min="1" oninput="calc()">
-        </div>
-        <div class="hint">How many hours do you want to work?</div>
-      </div>
-      <div class="field">
-        <label>Offer price</label>
-        <div class="input-wrap has-prefix">
-          <span class="input-prefix">$</span>
-          <input type="number" id="s1_offer" value="999" min="1" oninput="calc()">
-        </div>
-        <div class="hint">Price of your primary offer.</div>
+        <div class="hint">How much you take out each year. At 4%, your number is 25 times your life (1 ÷ 4% = 25).</div>
       </div>
     </div>
 
-    <div class="results-section">
-      <div class="results-label">Calculated targets</div>
-      <div class="metrics-grid">
-        <div class="metric-card gold">
-          <div class="m-label">Required revenue (annual)</div>
-          <div class="m-value" id="r_rev_annual">$1,500,000</div>
-        </div>
-        <div class="metric-card">
-          <div class="m-label">Monthly revenue target</div>
-          <div class="m-value" id="r_rev_monthly">$125,000</div>
-        </div>
-        <div class="metric-card">
-          <div class="m-label">Weekly revenue target</div>
-          <div class="m-value" id="r_rev_weekly">$34,091</div>
-        </div>
-        <div class="metric-card">
-          <div class="m-label">Your time value</div>
-          <div class="m-value" id="r_hourly">$1,364<span class="unit">/hr</span></div>
-        </div>
-      </div>
-      <hr class="offer-divider">
-      <div class="offer-label">Offer translation</div>
-      <div class="offer-grid">
-        <div class="metric-card">
-          <div class="m-label">Sales / year</div>
-          <div class="m-value" id="r_sales_yr">1,502</div>
-        </div>
-        <div class="metric-card">
-          <div class="m-label">Sales / month</div>
-          <div class="m-value" id="r_sales_mo">125</div>
-        </div>
-        <div class="metric-card">
-          <div class="m-label">Sales / week</div>
-          <div class="m-value" id="r_sales_wk">34</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="nav-row">
-      <button class="btn primary" onclick="goTo(1)">Freedom Number →</button>
-    </div>
-    <p class="disclaimer">Simple planning tool only — not financial, tax, or investment advice.</p>
-  </div>
-
-  <!-- STEP 2 -->
-  <div class="panel" id="panel1">
-    <div class="panel-header">
-      <h2>Your Freedom Number</h2>
-      <p>The destination — where your money starts working for you, not the other way around.</p>
-    </div>
-
-    <div class="input-grid">
-      <div class="field">
-        <label>Annual lifestyle income</label>
-        <div class="input-wrap has-prefix">
-          <span class="input-prefix">$</span>
-          <input type="number" id="s2_income" value="1000000" oninput="calc()">
-        </div>
-        <div class="hint">Pulled from Step 1 — edit to override.</div>
-      </div>
-      <div class="field">
-        <label>Safe withdrawal rate</label>
-        <div class="input-wrap has-suffix">
-          <input type="number" id="s2_swr" value="4" min="0.1" step="0.1" oninput="calc()">
-          <span class="input-suffix">%</span>
-        </div>
-        <div class="hint">% withdrawn yearly while investments keep growing.</div>
-      </div>
-    </div>
-
-    <div class="freedom-hero">
-      <div class="fh-label">Your freedom number</div>
-      <div class="fh-amount" id="r_freedom">$25,000,000</div>
-      <div class="fh-sub">Total investments needed to fund your lifestyle without relying on work</div>
+    <div class="number-hero" aria-live="polite">
+      <div class="nh-label">Your Endgame Number</div>
+      <div class="nh-amount" id="r_number">$3,750,000</div>
+      <div class="nh-sum" id="r_number_sum">$150,000 a year × 25</div>
+      <div class="nh-sub">The number that means you never have to stay in anything from fear.</div>
     </div>
 
     <div class="reflection">
-      <div class="r-title">Reflection prompts</div>
+      <div class="r-title">Sit with it for a moment</div>
       <div class="r-q">How does this number feel?</div>
       <div class="r-q">What surprised you?</div>
-      <div class="r-q">What would need to change to move closer to this?</div>
-      <div class="r-q">What is one decision you could make differently starting today?</div>
+      <div class="r-q">What would need to change to move closer to it?</div>
+      <div class="r-q">What's one decision you could make differently, starting today?</div>
     </div>
 
-    <div class="nav-row space">
-      <button class="btn" onclick="goTo(0)">← Back</button>
-      <button class="btn primary" onclick="goTo(2)">Path to Freedom →</button>
+    <div class="nav-row">
+      <button type="button" class="btn primary" onclick="goTo(1)">Next: your path</button>
     </div>
-    <p class="disclaimer">Simple planning tool only — not financial, tax, or investment advice.</p>
-  </div>
+    <p class="disclaimer">A simple planning tool only. Not financial, tax or investment advice.</p>
+  </section>
 
-  <!-- STEP 3 -->
-  <div class="panel" id="panel2">
+  <!-- STEP 2: YOUR PATH -->
+  <section class="panel" id="panel1">
     <div class="panel-header">
-      <h2>Your Path to Freedom</h2>
-      <p>Move from the number to the plan. Model how your investments could grow over time.</p>
+      <p class="panel-kicker">Step 2 · Your path</p>
+      <h2>What you need to invest each year</h2>
+      <p>How much to put away, outside your business, to reach your Endgame Number in the time you've chosen.</p>
     </div>
 
     <div class="input-grid">
       <div class="field">
-        <label>Current investments</label>
+        <label for="s2_current">Invested today, outside your business</label>
         <div class="input-wrap has-prefix">
           <span class="input-prefix">$</span>
-          <input type="number" id="s3_current" value="30000" oninput="calc()">
+          <input type="number" inputmode="decimal" id="s2_current" value="100000" min="0" oninput="calc()">
         </div>
-        <div class="hint">What you already have invested.</div>
+        <div class="hint">Shares, investment property equity, super, savings.</div>
       </div>
       <div class="field">
-        <label>Annual investment</label>
-        <div class="input-wrap has-prefix">
-          <span class="input-prefix">$</span>
-          <input type="number" id="s3_annual" value="550000" oninput="calc()">
-        </div>
-        <div class="hint">How much you plan to add each year.</div>
-      </div>
-      <div class="field">
-        <label>Expected growth rate</label>
+        <label for="s2_years">Years until work is optional</label>
         <div class="input-wrap has-suffix">
-          <input type="number" id="s3_rate" value="8" min="0" step="0.1" oninput="calc()">
+          <input type="number" inputmode="numeric" id="s2_years" value="15" min="1" max="50" oninput="calc()">
+          <span class="input-suffix">years</span>
+        </div>
+        <div class="hint">When do you want working to become a choice?</div>
+      </div>
+      <div class="field">
+        <label for="s2_rate">Expected growth rate</label>
+        <div class="input-wrap has-suffix">
+          <input type="number" inputmode="decimal" id="s2_rate" value="8" min="0" step="0.1" oninput="calc()">
           <span class="input-suffix">%</span>
         </div>
-        <div class="hint">Index funds, property, or other growth strategy.</div>
-      </div>
-      <div class="field">
-        <label>Years to project</label>
-        <div class="input-wrap">
-          <input type="number" id="s3_years" value="20" min="1" max="50" oninput="calc()">
-        </div>
-        <div class="hint">How many years do you want to model forward?</div>
+        <div class="hint">Be conservative. Returns aren't guaranteed and some years go backwards. Subtract inflation to keep everything in today's dollars.</div>
       </div>
     </div>
 
-    <div class="results-section">
-      <div class="results-label">Projected growth</div>
+    <div class="results-section" aria-live="polite">
+      <div class="results-label">Your path</div>
       <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="m-label">Future value of current investments</div>
-          <div class="m-value" id="r_fv_current">$139,829</div>
+        <div class="metric-card hl span2">
+          <div class="m-label">Invest each year</div>
+          <div class="m-value" id="r_invest_yr">$0</div>
+          <div class="metric-note" id="r_invest_note">About $0 a month, every month, for 15 years.</div>
         </div>
         <div class="metric-card">
-          <div class="m-label">Future value of contributions</div>
-          <div class="m-value" id="r_fv_contrib">$25,169,080</div>
+          <div class="m-label">Your Endgame Number</div>
+          <div class="m-value" id="r_number_2">$0</div>
         </div>
-        <div class="metric-card gold span2">
-          <div class="m-label">Projected total investments</div>
-          <div class="m-value" id="r_fv_total">$25,308,909</div>
-          <div class="progress-section">
+        <div class="metric-card">
+          <div class="m-label">What you have today grows to</div>
+          <div class="m-value" id="r_fv_current">$0</div>
+        </div>
+        <div class="metric-card span2">
+          <div class="progress-section" style="margin-top:0">
             <div class="progress-header">
-              <span>of freedom number (<span id="r_freedom_ref">$25,000,000</span>)</span>
-              <strong id="r_pct">101.2%</strong>
+              <span>Where you are today</span>
+              <strong id="r_pct">0%</strong>
             </div>
-            <div class="progress-track">
-              <div class="progress-fill achieved" id="r_progress" style="width:100%"></div>
-            </div>
+            <div class="progress-track"><div class="progress-fill" id="r_progress" style="width:0%"></div></div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="tagline">"Your business creates income. Your investments create freedom."</div>
+    <div class="nav-row space">
+      <button type="button" class="btn" onclick="goTo(0)">Back</button>
+      <button type="button" class="btn primary" onclick="goTo(2)">Next: your business</button>
+    </div>
+    <p class="disclaimer">A simple planning tool only. Not financial, tax or investment advice.</p>
+  </section>
+
+  <!-- STEP 3: ARCHITECT THE BUSINESS -->
+  <section class="panel" id="panel2">
+    <div class="panel-header">
+      <p class="panel-kicker">Step 3 · Architect the business</p>
+      <h2>Your CEO Numbers</h2>
+      <p>What your business needs to pay you, and the revenue it takes to get there. This is your real target. Not revenue for revenue's sake.</p>
+    </div>
+
+    <div class="input-grid">
+      <div class="field">
+        <label for="s3_live">What you live on now, a year</label>
+        <div class="input-wrap has-prefix">
+          <span class="input-prefix">$</span>
+          <input type="number" inputmode="decimal" id="s3_live" value="100000" min="0" oninput="calc()">
+        </div>
+        <div class="hint">Your life today, not your Endgame life.</div>
+      </div>
+      <div class="field">
+        <label for="s3_invest">What you'll invest each year</label>
+        <div class="input-wrap has-prefix">
+          <span class="input-prefix">$</span>
+          <input type="number" inputmode="decimal" id="s3_invest" value="0" min="0" oninput="investTouched = true; calc()">
+        </div>
+        <div class="hint">Pulled from step 2. Edit it to try a different amount.</div>
+      </div>
+      <div class="field">
+        <label for="s3_expenses">Annual business expenses</label>
+        <div class="input-wrap has-prefix">
+          <span class="input-prefix">$</span>
+          <input type="number" inputmode="decimal" id="s3_expenses" value="150000" min="0" oninput="calc()">
+        </div>
+        <div class="hint">What it costs to run your business.</div>
+      </div>
+      <div class="field">
+        <label for="s3_buffer">Profit buffer</label>
+        <div class="input-wrap has-suffix">
+          <input type="number" inputmode="decimal" id="s3_buffer" value="20" min="0" max="99" oninput="calc()">
+          <span class="input-suffix">%</span>
+        </div>
+        <div class="hint">Extra room for reinvestment, tax or safety.</div>
+      </div>
+      <div class="field">
+        <label for="s3_weeksoff">Weeks off per year</label>
+        <div class="input-wrap has-suffix">
+          <input type="number" inputmode="numeric" id="s3_weeksoff" value="8" min="0" max="51" oninput="calc()">
+          <span class="input-suffix">weeks</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="s3_hours">Hours per week</label>
+        <div class="input-wrap has-suffix">
+          <input type="number" inputmode="numeric" id="s3_hours" value="25" min="1" oninput="calc()">
+          <span class="input-suffix">hours</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="s3_offer">Price of your main offer</label>
+        <div class="input-wrap has-prefix">
+          <span class="input-prefix">$</span>
+          <input type="number" inputmode="decimal" id="s3_offer" value="999" min="1" oninput="calc()">
+        </div>
+      </div>
+    </div>
+
+    <div class="results-section" aria-live="polite">
+      <div class="results-label">Your CEO Numbers</div>
+      <div class="metrics-grid">
+        <div class="metric-card hl span2">
+          <div class="m-label">What your business needs to pay you</div>
+          <div class="m-value" id="r_pay">$0</div>
+          <div class="metric-note">What you live on now, plus what you invest each year. Before tax.</div>
+        </div>
+        <div class="metric-card">
+          <div class="m-label">Revenue needed a year</div>
+          <div class="m-value" id="r_rev_annual">$0</div>
+        </div>
+        <div class="metric-card">
+          <div class="m-label">Revenue a month</div>
+          <div class="m-value" id="r_rev_monthly">$0</div>
+        </div>
+        <div class="metric-card">
+          <div class="m-label">Revenue a working week</div>
+          <div class="m-value" id="r_rev_weekly">$0</div>
+        </div>
+        <div class="metric-card">
+          <div class="m-label">Your time is worth</div>
+          <div class="m-value" id="r_hourly">$0<span class="unit">/hr</span></div>
+        </div>
+      </div>
+      <hr class="offer-divider">
+      <div class="offer-label">In sales of your main offer</div>
+      <div class="offer-grid">
+        <div class="metric-card"><div class="m-label">A year</div><div class="m-value" id="r_sales_yr">0</div></div>
+        <div class="metric-card"><div class="m-label">A month</div><div class="m-value" id="r_sales_mo">0</div></div>
+        <div class="metric-card"><div class="m-label">A week</div><div class="m-value" id="r_sales_wk">0</div></div>
+      </div>
+    </div>
+
+    <p class="tagline">Your business is not the Endgame. It's the vehicle.</p>
 
     <div class="nav-row space">
-      <button class="btn" onclick="goTo(1)">← Back</button>
-      <button class="btn primary" onclick="downloadCSV()">↓ Download as Excel</button>
+      <button type="button" class="btn" onclick="goTo(1)">Back</button>
+      <button type="button" class="btn primary" onclick="downloadXLSX()">Download as Excel</button>
     </div>
-    <p class="disclaimer">Simple planning tool only — not financial, tax, or investment advice.</p>
-  </div>
+    <p class="disclaimer">A simple planning tool only. Not financial, tax or investment advice. Speak to a qualified accountant or financial adviser before making investment decisions.</p>
+  </section>
 
 </div>
 
 <script>
+  var investTouched = false;
+  var state = {};
+
+  function val(id, fallback) {
+    var v = parseFloat(document.getElementById(id).value);
+    return isNaN(v) ? fallback : v;
+  }
   function fmt(n) {
     if (isNaN(n) || !isFinite(n)) return '$0';
-    return '$' + Math.round(n).toLocaleString('en-US');
+    return '$' + Math.round(n).toLocaleString('en-AU');
   }
   function fmtN(n) {
     if (isNaN(n) || !isFinite(n)) return '0';
-    return Math.round(n).toLocaleString('en-US');
+    return Math.round(n).toLocaleString('en-AU');
   }
+  function set(id, text) { document.getElementById(id).textContent = text; }
 
   function calc() {
-    var income   = parseFloat(document.getElementById('s1_income').value)   || 0;
-    var expenses = parseFloat(document.getElementById('s1_expenses').value) || 0;
-    var buffer   = (parseFloat(document.getElementById('s1_buffer').value)  || 0) / 100;
-    var weeksoff = parseFloat(document.getElementById('s1_weeksoff').value) || 0;
-    var hours    = parseFloat(document.getElementById('s1_hours').value)    || 1;
-    var offer    = parseFloat(document.getElementById('s1_offer').value)    || 1;
+    // Step 1: Endgame Number
+    var life = val('s1_life', 0);
+    var swr = val('s1_swr', 4) / 100;
+    var number = swr > 0 ? life / swr : 0;
+    var multiple = swr > 0 ? 1 / swr : 0;
+    set('r_number', fmt(number));
+    set('r_number_sum', fmt(life) + ' a year × ' + (Math.round(multiple * 10) / 10));
 
-    var revAnnual  = buffer < 1 ? (income + expenses) / (1 - buffer) : 0;
-    var revMonthly = revAnnual / 12;
-    var workWeeks  = 52 - weeksoff;
-    var revWeekly  = workWeeks > 0 ? revAnnual / workWeeks : 0;
-    var revHourly  = hours > 0 ? revWeekly / hours : 0;
-    var salesYr    = offer > 0 ? revAnnual / offer : 0;
-    var salesMo    = salesYr / 12;
-    var salesWk    = workWeeks > 0 ? salesYr / workWeeks : 0;
+    // Step 2: path
+    var current = val('s2_current', 0);
+    var years = Math.max(1, val('s2_years', 15));
+    var rate = val('s2_rate', 0) / 100;
+    var growth = Math.pow(1 + rate, years);
+    var fvCurrent = current * growth;
+    var gap = Math.max(0, number - fvCurrent);
+    var investYr = gap <= 0 ? 0 : (rate > 0 ? gap * rate / (growth - 1) : gap / years);
+    var pct = number > 0 ? current / number : 0;
 
-    document.getElementById('r_rev_annual').textContent  = fmt(revAnnual);
-    document.getElementById('r_rev_monthly').textContent = fmt(revMonthly);
-    document.getElementById('r_rev_weekly').textContent  = fmt(revWeekly);
-    document.getElementById('r_hourly').innerHTML        = fmt(revHourly) + '<span class="unit">/hr</span>';
-    document.getElementById('r_sales_yr').textContent    = fmtN(salesYr);
-    document.getElementById('r_sales_mo').textContent    = fmtN(salesMo);
-    document.getElementById('r_sales_wk').textContent    = fmtN(salesWk);
+    set('r_invest_yr', fmt(investYr));
+    set('r_number_2', fmt(number));
+    set('r_fv_current', fmt(fvCurrent));
+    set('r_invest_note', investYr > 0
+      ? 'About ' + fmt(investYr / 12) + ' a month, every month, for ' + fmtN(years) + ' years.'
+      : 'What you already have is on track to reach your number on its own.');
+    set('r_pct', (pct * 100).toFixed(1) + '% of your number');
+    document.getElementById('r_progress').style.width = Math.min(pct * 100, 100) + '%';
 
-    var s2income   = parseFloat(document.getElementById('s2_income').value) || income;
-    var swr        = (parseFloat(document.getElementById('s2_swr').value) || 4) / 100;
-    var freedomNum = swr > 0 ? s2income / swr : 0;
+    // Step 3: CEO numbers
+    if (!investTouched) document.getElementById('s3_invest').value = Math.round(investYr);
+    var live = val('s3_live', 0);
+    var invest = val('s3_invest', 0);
+    var expenses = val('s3_expenses', 0);
+    var buffer = Math.min(val('s3_buffer', 0), 99) / 100;
+    var weeksOff = Math.min(Math.max(val('s3_weeksoff', 0), 0), 51);
+    var hours = Math.max(val('s3_hours', 1), 1);
+    var offer = Math.max(val('s3_offer', 1), 1);
 
-    document.getElementById('r_freedom').textContent     = fmt(freedomNum);
-    document.getElementById('r_freedom_ref').textContent = fmt(freedomNum);
+    var pay = live + invest;
+    var revAnnual = (pay + expenses) / (1 - buffer);
+    var workWeeks = 52 - weeksOff;
+    var revWeekly = revAnnual / workWeeks;
+    var salesYr = revAnnual / offer;
 
-    var currentInv = parseFloat(document.getElementById('s3_current').value) || 0;
-    var annualInv  = parseFloat(document.getElementById('s3_annual').value)  || 0;
-    var rate       = (parseFloat(document.getElementById('s3_rate').value)   || 0) / 100;
-    var years      = parseFloat(document.getElementById('s3_years').value)   || 1;
+    set('r_pay', fmt(pay));
+    set('r_rev_annual', fmt(revAnnual));
+    set('r_rev_monthly', fmt(revAnnual / 12));
+    set('r_rev_weekly', fmt(revWeekly));
+    document.getElementById('r_hourly').innerHTML = fmt(revWeekly / hours) + '<span class="unit">/hr</span>';
+    set('r_sales_yr', fmtN(salesYr));
+    set('r_sales_mo', fmtN(salesYr / 12));
+    set('r_sales_wk', fmtN(salesYr / workWeeks));
 
-    var fvCurrent = currentInv * Math.pow(1 + rate, years);
-    var fvContrib = rate > 0
-      ? annualInv * ((Math.pow(1 + rate, years) - 1) / rate)
-      : annualInv * years;
-    var fvTotal = fvCurrent + fvContrib;
-    var pct     = freedomNum > 0 ? fvTotal / freedomNum : 0;
-
-    document.getElementById('r_fv_current').textContent = fmt(fvCurrent);
-    document.getElementById('r_fv_contrib').textContent = fmt(fvContrib);
-    document.getElementById('r_fv_total').textContent   = fmt(fvTotal);
-    document.getElementById('r_pct').textContent        = (pct * 100).toFixed(1) + '%';
-
-    var bar = document.getElementById('r_progress');
-    bar.style.width    = Math.min(pct * 100, 100) + '%';
-    bar.className      = 'progress-fill' + (pct >= 1 ? ' achieved' : '');
+    state = { life: life, swr: swr, number: number, current: current, years: years, rate: rate,
+      fvCurrent: fvCurrent, investYr: investYr, live: live, invest: invest, expenses: expenses,
+      buffer: buffer, weeksOff: weeksOff, hours: hours, offer: offer };
+    postHeight();
   }
 
   function goTo(i) {
-    document.querySelectorAll('.panel').forEach(function(p, idx) {
-      p.classList.toggle('active', idx === i);
-    });
-    document.querySelectorAll('.step-pill').forEach(function(b, idx) {
+    document.querySelectorAll('.panel').forEach(function (p, idx) { p.classList.toggle('active', idx === i); });
+    document.querySelectorAll('.step-pill').forEach(function (b, idx) {
       b.classList.remove('active', 'done');
-      if (idx === i) b.classList.add('active');
+      b.removeAttribute('aria-current');
+      if (idx === i) { b.classList.add('active'); b.setAttribute('aria-current', 'step'); }
       else if (idx < i) b.classList.add('done');
     });
-    if (i === 1) {
-      var income = parseFloat(document.getElementById('s1_income').value) || 0;
-      document.getElementById('s2_income').value = income;
-    }
     calc();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // Tells a parent page (like Squarespace) how tall the calculator is, if it's listening
+  function postHeight() {
+    if (window.parent === window) return;
+    try { window.parent.postMessage({ type: 'spark-egc-height', height: document.body.scrollHeight }, '*'); } catch (e) {}
+  }
+  window.addEventListener('resize', postHeight);
+  window.addEventListener('load', postHeight);
+
   calc();
 
-  function downloadCSV() {
-    if (typeof XLSX === 'undefined') {
-      alert('Export is loading, please try again in a moment.');
-      return;
-    }
+  function downloadXLSX() {
+    if (typeof XLSX === 'undefined') { alert('The download is still loading. Please try again in a moment.'); return; }
+    var s = state;
+    var D = '"$"#,##0', P = '0.0%', N = '#,##0';
+    function c(v, z) { var o = typeof v === 'number' ? { t: 'n', v: v } : { t: 's', v: v }; if (z) o.z = z; return o; }
+    function f(formula, z) { var o = { t: 'n', f: formula }; if (z) o.z = z; return o; }
+    function sheet(cells, ref, widths) { var ws = {}; Object.keys(cells).forEach(function (k) { ws[k] = cells[k]; }); ws['!ref'] = ref; ws['!cols'] = widths; return ws; }
+    var disc = 'A simple planning tool only. Not financial, tax or investment advice.';
+    var date = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
 
-    var income   = parseFloat(document.getElementById('s1_income').value)   || 0;
-    var expenses = parseFloat(document.getElementById('s1_expenses').value) || 0;
-    var buffer   = parseFloat(document.getElementById('s1_buffer').value)   || 0;
-    var weeksoff = parseFloat(document.getElementById('s1_weeksoff').value) || 0;
-    var hours    = parseFloat(document.getElementById('s1_hours').value)    || 0;
-    var offer    = parseFloat(document.getElementById('s1_offer').value)    || 0;
-    var swr      = parseFloat(document.getElementById('s2_swr').value)      || 0;
-    var current  = parseFloat(document.getElementById('s3_current').value)  || 0;
-    var annual   = parseFloat(document.getElementById('s3_annual').value)   || 0;
-    var rate     = parseFloat(document.getElementById('s3_rate').value)     || 0;
-    var years    = parseFloat(document.getElementById('s3_years').value)    || 0;
+    var ws1 = sheet({
+      A1: c('SPARK Endgame Calculator'), A2: c('Generated ' + date),
+      A4: c('STEP 1: YOUR ENDGAME NUMBER'),
+      A5: c('What your life costs a year'), B5: c(s.life, D),
+      A6: c('Withdrawal rate'), B6: c(s.swr, P),
+      A8: c('Your Endgame Number'), B8: f('IFERROR(B5/B6,0)', D),
+      A10: c(disc)
+    }, 'A1:B10', [{ wch: 36 }, { wch: 20 }]);
 
-    var FMT_DOLLAR  = '"$"#,##0';
-    var FMT_DOLLAR2 = '"$"#,##0.00';
-    var FMT_PCT     = '0.0%';
-    var FMT_NUM     = '#,##0';
+    var ws2 = sheet({
+      A1: c('STEP 2: YOUR PATH'),
+      A3: c('Your Endgame Number'), B3: c(s.number, D),
+      A4: c('Invested today, outside your business'), B4: c(s.current, D),
+      A5: c('Years until work is optional'), B5: c(s.years, N),
+      A6: c('Expected growth rate'), B6: c(s.rate, P),
+      A8: c('What you have today grows to'), B8: f('B4*(1+B6)^B5', D),
+      A9: c('Invest each year'), B9: f('MAX(0,IFERROR((B3-B8)*B6/((1+B6)^B5-1),(B3-B8)/B5))', D),
+      A10: c('Invest each month (approx.)'), B10: f('B9/12', D),
+      A12: c(disc)
+    }, 'A1:B12', [{ wch: 40 }, { wch: 20 }]);
 
-    var HEADING  = { font: { bold: true, sz: 13, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '333031' } }, alignment: { horizontal: 'left' } };
-    var SUBHEAD  = { font: { bold: true, sz: 11, color: { rgb: '8B3E3E' } } };
-    var LABEL    = { font: { sz: 11, color: { rgb: '4a4648' } } };
-    var INPUT    = { font: { sz: 11, color: { rgb: '0000CC' } }, fill: { fgColor: { rgb: 'FFF5F5' } } };
-    var RESULT   = { font: { sz: 11, bold: true, color: { rgb: '333031' } }, fill: { fgColor: { rgb: 'F4F2F0' } } };
-    var DISC     = { font: { sz: 9, italic: true, color: { rgb: '999999' } } };
-
-    function cell(v, t, fmt, style) {
-      var c = t === 'f' ? { t: 'n', f: v } : { t: t || 's', v: v };
-      if (fmt) c.z = fmt;
-      if (style) c.s = style;
-      return c;
-    }
-
-    function applyToSheet(ws, cellMap) {
-      Object.keys(cellMap).forEach(function(addr) { ws[addr] = cellMap[addr]; });
-    }
+    var ws3 = sheet({
+      A1: c('STEP 3: YOUR CEO NUMBERS'),
+      A3: c('What you live on now, a year'), B3: c(s.live, D),
+      A4: c("What you'll invest each year"), B4: c(s.invest, D),
+      A5: c('Annual business expenses'), B5: c(s.expenses, D),
+      A6: c('Profit buffer'), B6: c(s.buffer, P),
+      A7: c('Weeks off per year'), B7: c(s.weeksOff, N),
+      A8: c('Hours per week'), B8: c(s.hours, N),
+      A9: c('Price of your main offer'), B9: c(s.offer, D),
+      A11: c('What your business needs to pay you (before tax)'), B11: f('B3+B4', D),
+      A12: c('Revenue needed a year'), B12: f('IFERROR((B11+B5)/(1-B6),0)', D),
+      A13: c('Revenue a month'), B13: f('B12/12', D),
+      A14: c('Working weeks a year'), B14: f('52-B7', N),
+      A15: c('Revenue a working week'), B15: f('IFERROR(B12/B14,0)', D),
+      A16: c('Your time is worth (per hour)'), B16: f('IFERROR(B15/B8,0)', D),
+      A17: c('Sales of your main offer a year'), B17: f('IFERROR(B12/B9,0)', N),
+      A18: c('Sales a month'), B18: f('B17/12', N),
+      A19: c('Sales a week'), B19: f('IFERROR(B17/B14,0)', N),
+      A21: c(disc)
+    }, 'A1:B21', [{ wch: 46 }, { wch: 20 }]);
 
     var wb = XLSX.utils.book_new();
-
-    // ── SHEET 1: CEO NUMBERS ──────────────────────────────────────
-    var ws1 = {};
-    applyToSheet(ws1, {
-      'A1': cell('SPARK Business — Endgame Calculator', 's', null, HEADING),
-      'A2': cell('Generated: ' + new Date().toLocaleDateString('en-AU', {day:'numeric',month:'long',year:'numeric'}), 's', null, LABEL),
-      'A4': cell('STEP 1: YOUR CEO NUMBERS', 's', null, HEADING),
-      'A5': cell('YOUR INPUTS', 's', null, SUBHEAD),
-      'A6': cell('Annual Income Goal', 's', null, LABEL),          'B6': cell(income,      'n', FMT_DOLLAR, INPUT),
-      'A7': cell('Annual Business Expenses', 's', null, LABEL),    'B7': cell(expenses,    'n', FMT_DOLLAR, INPUT),
-      'A8': cell('Profit Buffer', 's', null, LABEL),               'B8': cell(buffer/100,  'n', FMT_PCT,    INPUT),
-      'A9': cell('Weeks Off Per Year', 's', null, LABEL),          'B9': cell(weeksoff,    'n', FMT_NUM,    INPUT),
-      'A10': cell('Hours Per Week', 's', null, LABEL),             'B10': cell(hours,      'n', FMT_NUM,    INPUT),
-      'A11': cell('Offer Price', 's', null, LABEL),                'B11': cell(offer,      'n', FMT_DOLLAR, INPUT),
-      'A13': cell('CALCULATED TARGETS', 's', null, SUBHEAD),
-      'A14': cell('Required Revenue (Annual)', 's', null, LABEL),  'B14': cell('IFERROR((B6+B7)/(1-B8),0)', 'f', FMT_DOLLAR, RESULT),
-      'A15': cell('Monthly Revenue Target', 's', null, LABEL),     'B15': cell('B14/12', 'f', FMT_DOLLAR, RESULT),
-      'A16': cell('Working Weeks Per Year', 's', null, LABEL),     'B16': cell('52-B9', 'f', FMT_NUM, RESULT),
-      'A17': cell('Weekly Revenue Target', 's', null, LABEL),      'B17': cell('IFERROR(B14/B16,0)', 'f', FMT_DOLLAR, RESULT),
-      'A18': cell('Hourly Revenue Target', 's', null, LABEL),      'B18': cell('IFERROR(B17/B10,0)', 'f', FMT_DOLLAR2, RESULT),
-      'A20': cell('OFFER TRANSLATION', 's', null, SUBHEAD),
-      'A21': cell('Sales Per Year', 's', null, LABEL),             'B21': cell('IFERROR(B14/B11,0)', 'f', FMT_NUM, RESULT),
-      'A22': cell('Sales Per Month', 's', null, LABEL),            'B22': cell('IFERROR(B21/12,0)', 'f', FMT_NUM, RESULT),
-      'A23': cell('Sales Per Week', 's', null, LABEL),             'B23': cell('IFERROR(B21/B16,0)', 'f', FMT_NUM, RESULT),
-      'A25': cell('Simple planning tool only — not financial, tax, or investment advice.', 's', null, DISC)
-    });
-    ws1['!ref'] = 'A1:B25';
-    ws1['!cols'] = [{ wch: 34 }, { wch: 22 }];
-    ws1['!rows'] = [{ hpt: 22 }, {}, {}, {}, { hpt: 18 }];
-
-    // ── SHEET 2: FREEDOM NUMBER ───────────────────────────────────
-    var ws2 = {};
-    applyToSheet(ws2, {
-      'A1': cell('STEP 2: YOUR FREEDOM NUMBER', 's', null, HEADING),
-      'A3': cell('YOUR INPUTS', 's', null, SUBHEAD),
-      'A4': cell('Annual Lifestyle Income', 's', null, LABEL),   'B4': cell(income,    'n', FMT_DOLLAR, INPUT),
-      'A5': cell('Safe Withdrawal Rate', 's', null, LABEL),      'B5': cell(swr/100,   'n', FMT_PCT,    INPUT),
-      'A7': cell('YOUR FREEDOM NUMBER', 's', null, SUBHEAD),
-      'A8': cell('Total Investments Required', 's', null, LABEL),'B8': cell('IFERROR(B4/B5,0)', 'f', FMT_DOLLAR, RESULT),
-      'A10': cell('Simple planning tool only — not financial, tax, or investment advice.', 's', null, DISC)
-    });
-    ws2['!ref'] = 'A1:B10';
-    ws2['!cols'] = [{ wch: 34 }, { wch: 22 }];
-
-    // ── SHEET 3: PATH TO FREEDOM ──────────────────────────────────
-    var ws3 = {};
-    applyToSheet(ws3, {
-      'A1': cell('STEP 3: YOUR PATH TO FREEDOM', 's', null, HEADING),
-      'A3': cell('YOUR INPUTS', 's', null, SUBHEAD),
-      'A4': cell('Freedom Number (from Step 2)', 's', null, LABEL), 'B4': cell((swr > 0 ? income/(swr/100) : 0), 'n', FMT_DOLLAR, INPUT),
-      'A5': cell('Current Investments', 's', null, LABEL),           'B5': cell(current,   'n', FMT_DOLLAR, INPUT),
-      'A6': cell('Annual Investment', 's', null, LABEL),             'B6': cell(annual,    'n', FMT_DOLLAR, INPUT),
-      'A7': cell('Expected Growth Rate', 's', null, LABEL),          'B7': cell(rate/100,  'n', FMT_PCT,    INPUT),
-      'A8': cell('Years to Project', 's', null, LABEL),              'B8': cell(years,     'n', FMT_NUM,    INPUT),
-      'A10': cell('PROJECTED GROWTH', 's', null, SUBHEAD),
-      'A11': cell('Future Value of Current Investments', 's', null, LABEL),  'B11': cell('B5*(1+B7)^B8', 'f', FMT_DOLLAR, RESULT),
-      'A12': cell('Future Value of Annual Contributions', 's', null, LABEL), 'B12': cell('IFERROR(B6*(((1+B7)^B8-1)/B7),B6*B8)', 'f', FMT_DOLLAR, RESULT),
-      'A13': cell('Projected Total Investments', 's', null, LABEL),          'B13': cell('B11+B12', 'f', FMT_DOLLAR, RESULT),
-      'A14': cell('% of Freedom Number Achieved', 's', null, LABEL),         'B14': cell('IFERROR(B13/B4,0)', 'f', FMT_PCT, RESULT),
-      'A16': cell('Simple planning tool only — not financial, tax, or investment advice.', 's', null, DISC)
-    });
-    ws3['!ref'] = 'A1:B16';
-    ws3['!cols'] = [{ wch: 38 }, { wch: 22 }];
-
-    XLSX.utils.book_append_sheet(wb, ws1, 'Step 1 - CEO Numbers');
-    XLSX.utils.book_append_sheet(wb, ws2, 'Step 2 - Freedom Number');
-    XLSX.utils.book_append_sheet(wb, ws3, 'Step 3 - Path to Freedom');
-
+    XLSX.utils.book_append_sheet(wb, ws1, '1 Your Endgame Number');
+    XLSX.utils.book_append_sheet(wb, ws2, '2 Your Path');
+    XLSX.utils.book_append_sheet(wb, ws3, '3 Your CEO Numbers');
     XLSX.writeFile(wb, 'SPARK-Endgame-Calculator.xlsx');
   }
-
 </script>
 </body>
 </html>
