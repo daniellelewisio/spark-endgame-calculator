@@ -147,7 +147,6 @@
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 <div class="calculator">
@@ -389,7 +388,7 @@
 
     <div class="nav-row space">
       <button type="button" class="btn" onclick="goTo(1)">Back</button>
-      <button type="button" class="btn primary" onclick="downloadXLSX()">Download as Excel</button>
+      <button type="button" class="btn primary" onclick="downloadXLSX(this)">Download as Excel</button>
     </div>
     <p class="disclaimer">A simple planning tool only. Not financial, tax or investment advice. Speak to a qualified accountant or financial adviser before making investment decisions.</p>
   </section>
@@ -483,6 +482,7 @@
     });
     calc();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.parent !== window) { try { window.parent.postMessage({ type: 'spark-egc-step' }, '*'); } catch (e) {} }
   }
 
   // Tells a parent page (like Squarespace) how tall the calculator is, if it's listening
@@ -495,63 +495,62 @@
 
   calc();
 
-  function downloadXLSX() {
-    if (typeof XLSX === 'undefined') { alert('The download is still loading. Please try again in a moment.'); return; }
+  // Excel export: fills in the branded SPARK template (template.xlsx, in this repo) with the user's numbers
+  var EXCELJS_SRC = 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';
+  function loadExcelJS() {
+    return new Promise(function (resolve, reject) {
+      if (window.ExcelJS) return resolve();
+      var sc = document.createElement('script');
+      sc.src = EXCELJS_SRC; sc.onload = resolve; sc.onerror = reject;
+      document.head.appendChild(sc);
+    });
+  }
+
+  function downloadXLSX(btn) {
+    var label = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Preparing your file...'; }
+    var done = function () { if (btn) { btn.disabled = false; btn.textContent = label; } };
     var s = state;
-    var D = '"$"#,##0', P = '0.0%', N = '#,##0';
-    function c(v, z) { var o = typeof v === 'number' ? { t: 'n', v: v } : { t: 's', v: v }; if (z) o.z = z; return o; }
-    function f(formula, z) { var o = { t: 'n', f: formula }; if (z) o.z = z; return o; }
-    function sheet(cells, ref, widths) { var ws = {}; Object.keys(cells).forEach(function (k) { ws[k] = cells[k]; }); ws['!ref'] = ref; ws['!cols'] = widths; return ws; }
-    var disc = 'A simple planning tool only. Not financial, tax or investment advice.';
-    var date = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
 
-    var ws1 = sheet({
-      A1: c('SPARK Endgame Calculator'), A2: c('Generated ' + date),
-      A4: c('STEP 1: YOUR ENDGAME NUMBER'),
-      A5: c('What your life costs a year'), B5: c(s.life, D),
-      A6: c('Withdrawal rate'), B6: c(s.swr, P),
-      A8: c('Your Endgame Number'), B8: f('IFERROR(B5/B6,0)', D),
-      A10: c(disc)
-    }, 'A1:B10', [{ wch: 36 }, { wch: 20 }]);
+    loadExcelJS()
+      .then(function () { return fetch('template.xlsx', { cache: 'no-cache' }); })
+      .then(function (r) { if (!r.ok) throw new Error('template'); return r.arrayBuffer(); })
+      .then(function (buf) { var wb = new ExcelJS.Workbook(); return wb.xlsx.load(buf).then(function () { return wb; }); })
+      .then(function (wb) {
+        var ws = wb.getWorksheet('Endgame Calculator');
+        var put = function (addr, v) { ws.getCell(addr).value = v; };
+        put('C6', s.life); put('C7', s.swr);
+        put('C11', s.current); put('C12', s.years); put('C13', s.rate);
+        put('C20', s.live);
+        if (investTouched) put('C21', s.invest);
+        put('C22', s.expenses); put('C23', s.buffer); put('C24', s.weeksOff); put('C25', s.hours); put('C26', s.offer);
+        var today = new Date();
+        put('D2', 'Your numbers, exported ' + today.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }));
+        var monthly = wb.getWorksheet('Monthly Check-in');
+        if (monthly) monthly.getCell('D6').value = new Date(Date.UTC(today.getFullYear(), today.getMonth(), 1));
 
-    var ws2 = sheet({
-      A1: c('STEP 2: YOUR PATH'),
-      A3: c('Your Endgame Number'), B3: c(s.number, D),
-      A4: c('Invested today, outside your business'), B4: c(s.current, D),
-      A5: c('Years until work is optional'), B5: c(s.years, N),
-      A6: c('Expected growth rate'), B6: c(s.rate, P),
-      A8: c('What you have today grows to'), B8: f('B4*(1+B6)^B5', D),
-      A9: c('Invest each year'), B9: f('MAX(0,IFERROR((B3-B8)*B6/((1+B6)^B5-1),(B3-B8)/B5))', D),
-      A10: c('Invest each month (approx.)'), B10: f('B9/12', D),
-      A12: c(disc)
-    }, 'A1:B12', [{ wch: 40 }, { wch: 20 }]);
-
-    var ws3 = sheet({
-      A1: c('STEP 3: YOUR CEO NUMBERS'),
-      A3: c('What you live on now, a year'), B3: c(s.live, D),
-      A4: c("What you'll invest each year"), B4: c(s.invest, D),
-      A5: c('Annual business expenses'), B5: c(s.expenses, D),
-      A6: c('Profit buffer'), B6: c(s.buffer, P),
-      A7: c('Weeks off per year'), B7: c(s.weeksOff, N),
-      A8: c('Hours per week'), B8: c(s.hours, N),
-      A9: c('Price of your main offer'), B9: c(s.offer, D),
-      A11: c('What your business needs to pay you (before tax)'), B11: f('B3+B4', D),
-      A12: c('Revenue needed a year'), B12: f('IFERROR((B11+B5)/(1-B6),0)', D),
-      A13: c('Revenue a month'), B13: f('B12/12', D),
-      A14: c('Working weeks a year'), B14: f('52-B7', N),
-      A15: c('Revenue a working week'), B15: f('IFERROR(B12/B14,0)', D),
-      A16: c('Your time is worth (per hour)'), B16: f('IFERROR(B15/B8,0)', D),
-      A17: c('Sales of your main offer a year'), B17: f('IFERROR(B12/B9,0)', N),
-      A18: c('Sales a month'), B18: f('B17/12', N),
-      A19: c('Sales a week'), B19: f('IFERROR(B17/B14,0)', N),
-      A21: c(disc)
-    }, 'A1:B21', [{ wch: 46 }, { wch: 20 }]);
-
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws1, '1 Your Endgame Number');
-    XLSX.utils.book_append_sheet(wb, ws2, '2 Your Path');
-    XLSX.utils.book_append_sheet(wb, ws3, '3 Your CEO Numbers');
-    XLSX.writeFile(wb, 'SPARK-Endgame-Calculator.xlsx');
+        // Clear cached results so every formula recalculates with the new numbers
+        wb.eachSheet(function (sheet) {
+          sheet.eachRow({ includeEmpty: false }, function (row) {
+            row.eachCell(function (c) { if (c.formula) c.value = { formula: c.formula }; });
+          });
+        });
+        wb.calcProperties.fullCalcOnLoad = true;
+        return wb.xlsx.writeBuffer();
+      })
+      .then(function (out) {
+        var blob = new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'SPARK-Endgame-Calculator.xlsx';
+        document.body.appendChild(a); a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+        done();
+      })
+      .catch(function () {
+        done();
+        alert('Sorry, the download didn\'t work that time. Please try again in a moment.');
+      });
   }
 </script>
 </body>
